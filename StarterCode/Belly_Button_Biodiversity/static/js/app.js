@@ -26,7 +26,7 @@ function buildMetadata(sample) {
       var selectMetadata = d3.select("#sample-metadata");
       selectMetadata.html("");
       Object.defineProperties(sample).forEach(function ([key, value]) {
-          var row = selectMetadata.append("p");
+          var row = selectMetadata.append("h5");
           row.text(`${key}: ${value}`);
       });
   });
