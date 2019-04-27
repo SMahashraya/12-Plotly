@@ -8,33 +8,45 @@ function init() {
               .text(sample)
               .property("value", sample);
       });
-      dropdown_select.data(response)
-      .enter()
-      .append("option")
-      .attr("value",data)
-      .text(data)
+      // dropdown_select.data(sampleNames)
+      // .enter()
+      // .append("option")
+      // .attr("value",data)
+      // .text(data)
 
       const firstSample = sampleNames[0];
-      buildCharts(firstSample);
+      console.log(firstSample)
       buildMetadata(firstSample);
+      buildBubble(firstSample);
+      buildPie(firstSample);
   });
 }
 
 function buildMetadata(sample) {
+  console.log("You're in buildMetadata")
   var url = `/metadata/${sample}`
-  d3.json(url).then(function(sample) {
+  d3.json(url).then(function(response) {
+      console.log(response)
       var selectMetadata = d3.select("#sample-metadata");
-      selectMetadata.html("");
-      Object.defineProperties(sample).forEach(function ([key, value]) {
-          var row = selectMetadata.append("h5");
-          row.text(`${key}: ${value}`);
-      });
+      // selectMetadata.html("");
+      selectMetadata.selectAll("p").remove();
+      Object.entries(response).forEach(([key, value]) => {
+        selectMetadata.append("p").text(`${key}: ${value}`);
+      }); 
+      // {
+        // console.log(response)
+        //   var row = selectMetadata.append("p");
+        //   row.text(`${key}: ${value}`);
+        //   console.log(row)
+        //   console.log(row.text)
+      // });
   });
 };
 
 function buildBubble(sample) {
+  console.log("You're in buildBubble")
   var url = `/samples/${sample}`
-  d3.json(url).then(function(data) {
+  d3.json(url).then((data) => {
       var x_values = data.otu_ids;
       var y_values = data.sample_values;
       var m_size = data.sample_values;
@@ -42,28 +54,43 @@ function buildBubble(sample) {
       var t_values = data.otu_labels;
 
       var layout = {
+        margin: { t: 0 },
+        hovermode: "closest",
+        xaxis: { title: "OTU ID" }
+      };
+
+      var data = [{
           x: x_values,
           y: y_values,
-          textz: t_values,
+          text: t_values,
           mode: "markers",
           marker: {
               color: m_colors,
-              size: m_size
+              size: m_size,
+              colorscale: "Fire"
           }
-      };
+      }];
 
       Plotly.newPlot("bubble", data, layout)
   });
 };
 
 function buildPie(sample) {
+  console.log("You're in buildPie")
   var url = `/samples/${sample}`
-  d3.json(url).then(function(data) {
+  d3.json(url).then((data) => {
       var pie_labels = data.otu_ids.slice(0,11);
       var pie_values = data.sample_values.slice(0,11);
       var pie_desc = data.otu_labels.slice(0,11);
+      console.log(pie_labels)
+      console.log(pie_values)
+      console.log(pie_desc)
 
       var layout = {
+        margin: { t: 0, l: 0 }
+      };
+
+      var data = [{
           values: pie_values,
           labels: pie_labels,
           type: "pie",
@@ -72,8 +99,9 @@ function buildPie(sample) {
           text: pie_desc,
           textposition: "inside",
           hoverinfo: "label+value+text+percent" 
-      }
-      Plotly.newplot("pie", data, layout)
+      }];
+
+      Plotly.plot("pie", data, layout)
   })
 }
 
